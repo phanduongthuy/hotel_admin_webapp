@@ -110,7 +110,6 @@ name: "User",
       api.getUser(params).then(response => {
         this.users = _.get(response, "data.data.data", [])
         this.page.currentPage = _.get(response, 'data.data.current_page')
-        this.page.pageSize = _.get(response, 'data.data.per_page')
         this.page.total = _.get(response, 'data.data.total', 0)
         let from = _.get(response, 'data.data.from', 0)
         let to = _.get(response, 'data.data.to', 0)
@@ -145,7 +144,7 @@ name: "User",
       loading: false,
       page: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 15,
         total: 0,
         from: 0,
         to: 0

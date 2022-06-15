@@ -131,26 +131,28 @@ export default {
             params: data
         })
     },
-    getOrderNotQuote(data) {
+    getOrderRequest(data) {
         return apiAxios({
             method: 'get',
-            url: 'admins/orders/not-quote',
+            url: 'admins/orders/order-request',
             params: data
         })
     },
-    getAllLanguage() {
-        return apiAxios({
-            method: 'get',
-            url: 'get-all-language'
-        })
-    },
-    uploadDocument(data) {
+    confirmRequestOrder(data, id) {
         return apiAxios({
             method: 'post',
-            url: 'admins/upload-document',
+            url: 'admins/orders/confirm/' + id,
             data: data
         })
     },
+    cancelRequestOrder(data, id) {
+        return apiAxios({
+            method: 'post',
+            url: 'admins/orders/cancel/' + id,
+            data: data
+        })
+    },
+
     updateOrder(data) {
         return apiAxios({
             method: 'put',
@@ -158,13 +160,7 @@ export default {
             data: data
         })
     },
-    exportFile(id) {
-        return apiAxios({
-            method: 'get',
-            url: 'download-document/' + id,
-            responseType: 'blob',
-        })
-    },
+
     getUser(data) {
         return apiAxios({
             method: 'get',
@@ -196,12 +192,7 @@ export default {
             url: 'admins/orders/statistic-order',
         })
     },
-    getALLFeedback() {
-        return apiAxios({
-            method: 'get',
-            url: 'admins/feedbacks/',
-        })
-    },
+
 
     getServiceRule() {
         return apiAxios({
@@ -354,4 +345,46 @@ export default {
             url: 'admins/categories/all',
         })
     },
+    getRooms(params = null) {
+        return apiAxios({
+            method: 'get',
+            url: 'admins/rooms',
+            params: params
+        })
+    },
+    getAllRooms() {
+        return apiAxios({
+            method: 'get',
+            url: 'admins/rooms/all',
+        })
+    },
+    addRoom(data) {
+        return apiAxios({
+            method: 'post',
+            url: 'admins/rooms',
+            data: data
+        })
+    },
+    updateRoom(data, id) {
+        return apiAxios({
+            method: 'put',
+            url: 'admins/rooms/' + id,
+            data: data
+        })
+    },
+    deleteRoom(id) {
+        return apiAxios({
+            method: 'delete',
+            url: 'admins/rooms/' + id
+        })
+    },
+    changeStatusRoom(id, data) {
+        return apiAxios({
+            method: 'put',
+            url: 'admins/rooms/' + id + '/active',
+            data: data
+        })
+    },
+
+
 }

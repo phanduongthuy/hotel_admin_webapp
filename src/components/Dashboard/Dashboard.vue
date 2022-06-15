@@ -43,38 +43,38 @@
     </el-row>
 
     <el-card class="box-infor">
-      <h4>Thống kê đơn hàng</h4>
+      <h4>Thống kê đơn đặt phòng</h4>
       <el-row>
         <el-col :xs="{span:24}" :sm="{span:24}" :md="{span:6}" :lg="{span:6}" class="border-right">
-          <div class="tip">Tổng số đơn hàng</div>
+          <div class="tip">Tổng số đơn đặt phòng</div>
           <div class="content">
             {{ countOrder.orderAll > 0 ? countOrder.orderAll : 0 }}
           </div>
         </el-col>
         <el-col :xs="{span:24}" :sm="{span:24}" :md="{span:6}" :lg="{span:6}" class="padding-lr border-right">
-          <div class="tip">Chưa báo giá</div>
+          <div class="tip">Yêu cầu đặt phòng</div>
           <div class="content">
-            {{ statisticOrder['orderNoPrice'] > 0 ? statisticOrder['orderNoPrice'] : 0}}
+            {{ countOrder.orderRequest > 0 ? countOrder.orderRequest : 0}}
           </div>
         </el-col>
         <el-col :xs="{span:24}" :sm="{span:24}" :md="{span:6}" :lg="{span:6}" class="padding-lr border-right">
-          <div class="tip">Đang dịch/review</div>
+          <div class="tip">Đã hoàn thành</div>
           <div class="content">
-            {{ statisticOrder['orderTranslating'] > 0 ? statisticOrder['orderTranslating'] : 0 }}
+            {{ countOrder.orderSuccess > 0 ? countOrder.orderSuccess : 0 }}
           </div>
         </el-col>
         <el-col :xs="{span:24}" :sm="{span:24}" :md="{span:6}" :lg="{span:6}" class="padding-lr">
-          <div class="tip">Hoàn thành</div>
+          <div class="tip">Đã hủy</div>
           <div class="content">
-            {{ statisticOrder['orderSuccess'] > 0 ? statisticOrder['orderSuccess'] : 0 }}
+            {{ countOrder.orderCancel > 0 ? countOrder.orderCancel : 0 }}
           </div>
         </el-col>
       </el-row>
     </el-card>
     <el-row :gutter="20">
-      <el-col :span="12">
+      <el-col :span="24">
         <el-card class="list-order">
-          <h4 class="tab-head">Đơn hàng</h4>
+          <h4 class="tab-head">Đơn đặt phòng</h4>
           <el-table
               v-loading="loading"
               :data="orders"
@@ -82,118 +82,62 @@
               @sort-change="sort">
             <el-table-column
                 prop="created_at"
-                label="Ngày đặt hàng"
-                width="150px">
-              <template slot-scope="item">
-                <span v-if="item.row.created_at">{{ formatDateTime(item.row.created_at) }}</span>
-                <span v-else>Đang cập nhật</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-                prop="file_name"
-                label="Tên file"
-                min-width="200px">
-              <template slot-scope="item">
-                <span class="file_name" @click="exportFile(item.row)">{{ getFileName(item.row.document.path.filename)}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column
-                prop="type"
-                label="Loại đơn"
-                min-width="200px"
+                label="Ngày đặt phòng"
+                width="200px"
                 align="center">
               <template slot-scope="item">
-                <span v-if="item.row.type == 0">Dịch</span>
-                <div>
-                  <span v-if="item.row.type == 0 && item.row.language_native">{{ item.row.language_native.name }}</span>
-                  <span v-if="item.row.type == 0 && item.row.language_native && item.row.language_translate"> - </span>
-                  <span v-if="item.row.type == 0 && item.row.language_translate">{{ item.row.language_translate.name }}</span>
-                </div>
-                <span v-if="item.row.type == 1">Review</span>
-                <div>
-                  <span v-if="item.row.type == 1 && item.row.language_native">{{ item.row.language_native.name }}</span>
-                  <span v-if="item.row.type == 1 && item.row.language_native && item.row.language_translate"> - </span>
-                  <span v-if="item.row.type == 1 && item.row.language_translate">{{ item.row.language_translate.name }}</span>
-                </div>
+                <span v-if="item.row.created_at">{{ formatDate(item.row.created_at) }}</span>
+                <span v-else>Đang cập nhật</span>
               </template>
             </el-table-column>
             <el-table-column
                 label="Tên khách hàng"
                 min-width="200px">
               <template slot-scope="item">
-                <div v-if="item.row.user">
-                  <span v-if="item.row.user.name && item.row.user.name.length > 0" class="user_name">{{ item.row.user.name }}</span>
-                  <span v-else class="user_name">{{ item.row.user.user_name }}</span>
-                </div>
+                <span class="file_name">{{ item.row.customer_name}}</span>
               </template>
             </el-table-column>
             <el-table-column
-                label="Hạn trả"
-                width="150px"
-                sortable>
+                prop="type"
+                label="Loại dịch vụ"
+                min-width="200px"
+                align="center">
               <template slot-scope="item">
-                <span v-if="item.row.deadline">{{ formatDateTime(parseInt(item.row.deadline) * 1000) }}</span>
+                <span v-if="item.row.type == 0">Qua đêm</span>
+                <span v-else>Giờ</span>
+
+              </template>
+            </el-table-column>
+            <el-table-column
+                label="Thời gian checkin"
+                width="170px">
+              <template slot-scope="item">
+                <span v-if="item.row.checkin_time">{{ formatDateTime(parseInt(item.row.checkin_time) * 1000) }}</span>
                 <span v-else>Đang cập nhật</span>
               </template>
             </el-table-column>
           </el-table>
           <div class="paginationWarp" v-if="orders.length > 0">
-            <el-col :span="16">
-              <div class="textInfo">
-                <p>Số lượng kết quả: {{ page.from }} - {{ page.to }} của {{ page.total }} </p>
-              </div>
-            </el-col>
-
-            <el-col :span="8">
-              <el-pagination
-                  layout="prev, pager, next"
-                  :total="page.total"
-                  :page-size="page.pageSize"
-                  :current-page="page.currentPage"
-                  @current-change="handleCurrentChange"
-              >
-              </el-pagination>
-            </el-col>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="myRate">
-          <h4 class="tab-head">Đánh giá khách hàng</h4>
-          <el-col :span="24" v-loading="loadingFeedback">
-            <el-row v-for="item in feedbacks" :key="item._id" >
-              <el-col :span="24">
-                <div class="feedback-warp">
-                  <el-row>
-                    <el-col :span="4" class="feedback-images">
-                      <img src="../../assets/images/doc.png">
-                    </el-col>
-                    <el-col :span="20" class="feedback-info">
-                      <a v-if="item.document">{{ getFileName(item.document.path.filename)}}...</a>
-                      <p class="feedback-time">
-                        <span>{{ formatDate(item.created_at)}}</span>
-                        <span>{{ formatTime(item.created_at)}}</span>
-                      </p>
-                      <div>
-                        <div class="star">
-                          <h3 v-if="parseInt(item.rate_star) === 0">Rất tệ</h3>
-                          <h3 v-if="parseInt(item.rate_star) === 1">Không hài lòng</h3>
-                          <h3 v-if="parseInt(item.rate_star) === 2">Không tốt</h3>
-                          <h3 v-if="parseInt(item.rate_star) === 3">Bình thường</h3>
-                          <h3 v-if="parseInt(item.rate_star) === 4">Hài lòng</h3>
-                          <h3 v-if="parseInt(item.rate_star) === 5">Rất hài lòng</h3>
-                          <el-rate :value="parseInt(item.rate_star)" disabled></el-rate>
-                        </div>
-                      </div>
-                      <div class="feedback-content">
-                        {{ item.content }}
-                      </div>
-                    </el-col>
-                  </el-row>
+            <el-row style="display: flex;" >
+              <el-col :span="16" style="justify-content: flex-start">
+                <div class="textInfo">
+                  <p>Số lượng kết quả: {{ page.from }} - {{ page.to }} của {{ page.total }} </p>
                 </div>
               </el-col>
+
+              <el-col :span="8" style="justify-content: flex-end">
+                <el-pagination
+                    layout="prev, pager, next"
+                    :total="page.total"
+                    :page-size="page.pageSize"
+                    :current-page="page.currentPage"
+                    @current-change="handleCurrentChange"
+                >
+                </el-pagination>
+              </el-col>
             </el-row>
-          </el-col>
+
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -225,7 +169,7 @@ export default {
       orders: [],
       page: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 15,
         total: 0,
         from: 0,
         to: 0
@@ -258,7 +202,6 @@ export default {
       api.getOrder(params).then(response => {
         this.orders = _.get(response, "data.data.data", [])
         this.page.currentPage = _.get(response, 'data.data.current_page')
-        this.page.pageSize = _.get(response, 'data.data.per_page')
         this.page.total = _.get(response, 'data.data.total', 0)
         let from = _.get(response, 'data.data.from', 0)
         let to = _.get(response, 'data.data.to', 0)
@@ -283,21 +226,7 @@ export default {
       }
       this.handleGetOrder();
     },
-    exportFile(item) {
-      api.exportFile(item.document._id).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', item.file_name);
-        document.body.appendChild(link);
-        link.click()
-      }).catch(() => {
-        this.$message.error({
-          type: 'error',
-          message: "Có lỗi! Vui lòng thử lại sau"
-        })
-      })
-    },
+
     getUsers() {
       api.getCountUser().then((res) => {
         if (res) {
@@ -319,27 +248,12 @@ export default {
         }
       })
     },
-    getStatisticOrder() {
-      api.statisticOrder().then((res) => {
-        if (res) {
-          this.statisticOrder = _.get(res, 'data.data')
-        }
-      })
-    },
-    getFeedbacks() {
-      this.loadingFeedback = true
-      api.getALLFeedback().then((res) => {
-        if (res) {
-          this.loadingFeedback = false
-          this.feedbacks = _.get(res, 'data.data')
-        }
-      })
-    },
+
     formatMoney(price) {
       return formatMoneyShow(price)
     },
     formatDateTime(value) {
-      return moment(value).format('DD/MM/YYYY')
+      return moment(value).format('hh:mm:ss | DD/MM/YYYY')
     },
   },
   mounted() {
@@ -348,9 +262,7 @@ export default {
     this.getUsers()
     this.getOrders()
     this.getRevenues()
-    this.getFeedbacks()
     this.handleGetOrder()
-    this.getStatisticOrder()
   }
 }
 </script>

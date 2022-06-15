@@ -33,6 +33,12 @@
           </el-menu-item-group>
 
           <el-menu-item-group title="QUẢN LÝ" class="mb-15">
+            <router-link to="/rooms">
+              <el-menu-item index="16" class="menu_item">
+                <i class="el-icon-film"></i>
+                <span>Phòng</span>
+              </el-menu-item>
+            </router-link>
             <router-link to="/categories">
               <el-menu-item index="15" class="menu_item">
                 <i class="el-icon-notebook-2"></i>
@@ -42,49 +48,21 @@
             <router-link to="/employees">
               <el-menu-item index="3" class="menu_item">
                 <i class="el-icon-user"></i>
-                <span>Quản lý nhân viên</span>
-              </el-menu-item>
-            </router-link>
-            <router-link to="/support-request">
-              <el-menu-item index="2" class="menu_item">
-                <i class="el-icon-document-copy"></i>
-                <el-badge :value="supportRequest" class="item">
-                  <span>Yêu cầu khách hàng</span>
-                </el-badge>
+                <span>Nhân viên</span>
               </el-menu-item>
             </router-link>
             <router-link to="/user">
               <el-menu-item index="5" class="menu_item">
                 <i class="el-icon-coordinate"></i>
-                <span>Danh sách khách hàng</span>
-              </el-menu-item>
-            </router-link>
-            <router-link to="/service-rule">
-              <el-menu-item index="8" class="menu_item">
-                <i class="el-icon-document"></i>
-                <span>Điều khoản dịch vụ</span>
+                <span>Khách hàng</span>
               </el-menu-item>
             </router-link>
           </el-menu-item-group>
           <el-menu-item-group title="QUẢN LÝ NỘI DUNG" class="mb-15">
-            <router-link to="/members">
-              <el-menu-item index="11" class="menu_item">
-                <i class="el-icon-user"></i>
-                <span>Đội ngũ</span>
-              </el-menu-item>
-            </router-link>
-          </el-menu-item-group>
-          <el-menu-item-group title="CẤU HÌNH" class="mb-15">
-            <router-link to="/config-email-template">
-              <el-menu-item index="14" class="menu_item">
-                <i class="el-icon-message"></i>
-                <span>Cấu hình nội dung email</span>
-              </el-menu-item>
-            </router-link>
-            <router-link to="/information">
-              <el-menu-item index="10" class="menu_item">
-                <i class="el-icon-setting"></i>
-                <span>Cấu hình thông tin</span>
+            <router-link to="/service-rule">
+              <el-menu-item index="8" class="menu_item">
+                <i class="el-icon-document"></i>
+                <span>Điều khoản dịch vụ</span>
               </el-menu-item>
             </router-link>
           </el-menu-item-group>
@@ -190,7 +168,8 @@ export default {
 .sideBar {
   width: 250px !important;
   height: 100vh;
-  background: #FFFFFF;
+  background: $colorSideBarBg;
+  box-shadow: inset -10px 0 10px -5px rgba(0, 0, 0, 0.1);
   position: relative;
   outline: none;
   overflow: hidden;
@@ -199,17 +178,17 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #FFFFFF;
+    background-color: #fff;
     flex-shrink: 0;
     min-height: 58px;
     width: 230px;
 
     img {
+      padding-top: 10px;
       width: 150px;
     }
   }
   .menu-scroll {
-    background-color: #FFFFFF;
     height: 85%;
     outline: none;
     overflow-y: hidden;
@@ -218,7 +197,7 @@ export default {
       width: 10px;
       height: 10px;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background-color: #C0C4CC;
       border-radius: 8px;
@@ -238,29 +217,21 @@ export default {
     .el-menu {
       padding-bottom: 50px;
       border: none;
-      background-color: #FFFFFF;
+      box-shadow: inset -10px 0 10px -5px rgba(0, 0, 0, 0.1);
 
       a {
         color: rgb(255, 255, 255);
         text-decoration: none;
 
-        i {
-          color: #121519;
-        }
-
         .menu_item:hover {
-          background-color: #C5D9FF !important;
-          color: #599AF2 !important;
-          i {
-            color: #599AF2 !important;
-          }
+          background-color: #0bc7b41c !important;
         }
       }
     }
   }
 
   .is-active {
-    background-color: #035392 !important;
+    background-color: #0bc7b41c !important;
   }
 
   .customBadge {
@@ -286,7 +257,7 @@ export default {
     justify-content: space-between;
     border-bottom: 1px solid $colorStroke;
     height: 60px;
-    background: #599AF2;
+    background: $colorHeaderBg;
     padding: 0 24px;
 
     .headerLeftWrap {
@@ -294,7 +265,6 @@ export default {
       align-items: center;
       font-size: 24px;
       font-weight: bold;
-      color: #ffffff;
     }
 
     .headerRightWrap {
@@ -365,10 +335,7 @@ export default {
   background-color: #ffffff00 !important;
 }
 .sideBar .menu-scroll .el-menu a .is-active{
-  i {
-    color: #599AF2 !important;
-  }
-  background-color: #C5D9FF !important;
+  background-color: #0bc7b41c !important;
 }
 
 .el-badge::v-deep {

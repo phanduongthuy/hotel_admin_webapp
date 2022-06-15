@@ -57,7 +57,8 @@
     <div class="content order-1 order-lg-1 d-flex flex-column w-100 pb-0 pt-0" style="background-color: #F8F8F8;">
       <!--end::Title-->
       <!--begin::Image-->
-      <div class="content-img d-flex flex-row-fluid bgi-no-repeat bgi-position-y-bottom bgi-position-x-center" :style="{'background-image': 'url(' + require('../assets/images/translate.jpg') + ')' }"></div>
+      <div class="content-img d-flex flex-row-fluid bgi-no-repeat bgi-position-y-bottom bgi-position-x-center"
+           :style="{'background-image': 'url(' + require('../assets/images/hotel.jpg') + ')' }"></div>
       <!--end::Image-->
     </div>
     <!--end::Content-->

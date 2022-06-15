@@ -71,6 +71,11 @@ const routes = [
     name: 'Category',
     component: () => import('../views/Category')
   },
+  {
+    path: '/rooms',
+    name: 'Room',
+    component: () => import('../views/Room')
+  },
 ]
 
 const router = new VueRouter({

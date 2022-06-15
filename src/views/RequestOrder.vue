@@ -9,34 +9,15 @@
                 <el-input class="inputSearch" v-model="search" @clear="handleSearch"
                           @keydown.enter.native="handleSearch"
                           clearable
-                          placeholder="Nhập tên file để tìm kiếm"></el-input>
+                          placeholder="Nhập tên khách hàng để tìm kiếm"></el-input>
                 <el-button icon="el-icon-search" @click="handleSearch">Tìm kiếm</el-button>
               </div>
             </el-col>
+
             <el-col :span="3">
-              <el-select v-model="selectedLanguage" @change="handleSearch" placeholder="Ngôn ngữ gốc" clearable>
-                <el-option
-                    v-for="item in language"
-                    :key="item._id"
-                    :label="item.description"
-                    :value="item._id">
-                </el-option>
-              </el-select>
-            </el-col>
-            <el-col :span="3">
-              <el-select v-model="selectedLanguageTranslate" @change="handleSearch" placeholder="Ngôn ngữ dịch" clearable>
-                <el-option
-                    v-for="item in language"
-                    :key="item._id"
-                    :label="item.description"
-                    :value="item._id">
-                </el-option>
-              </el-select>
-            </el-col>
-            <el-col :span="3">
-              <el-select v-model="type" placeholder="Loại đơn" @change="handleSearch" clearable>
-                <el-option label="Dịch" value="0"></el-option>
-                <el-option label="Review" value="1"></el-option>
+              <el-select v-model="type" placeholder="Loại dịch vụ" @change="handleSearch" clearable>
+                <el-option label="Qua đêm" value="0"></el-option>
+                <el-option label="Giờ" value="1"></el-option>
               </el-select>
             </el-col>
           </el-row>
@@ -47,13 +28,11 @@
       <el-table
           v-loading="loading"
           :data="order"
-          height="calc(100vh - 307px)"
-          @sort-change="sort">
+          height="calc(100vh - 307px)">
         <el-table-column
             fixed
             prop="created_at"
-            label="Ngày đặt hàng"
-            width="150px">
+            label="Ngày đặt phòng">
           <template slot-scope="item">
             <span v-if="item.row.created_at">{{ formatDateTime(item.row.created_at) }}</span>
             <span v-else>-</span>
@@ -61,125 +40,50 @@
         </el-table-column>
         <el-table-column
             fixed
-            prop="file_name"
-            label="Tên file"
-            min-width="200px">
+            label="Tên khách hàng">
           <template slot-scope="item">
-            <span class="user_file" @click="exportFile(item.row)"><i class="el-icon-download"></i> {{ getFileName(item.row.file_name) }}</span>
+             {{ item.row.customer_name }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            label="Số điện thoại">
+          <template slot-scope="item">
+            <span v-if="item.row.user_id">{{ item.row.user.phone }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column
             prop="type"
-            label="Loại đơn"
-            min-width="200px"
+            label="Loại dịch vụ"
             align="center">
           <template slot-scope="item">
-            <span v-if="item.row.type == 0">Dịch</span>
-            <div>
-              <span v-if="item.row.type == 0 && item.row.language_native">{{ item.row.language_native.name }}</span>
-              <span v-if="item.row.type == 0 && item.row.language_native && item.row.language_translate"> - </span>
-              <span v-if="item.row.type == 0 && item.row.language_translate">{{ item.row.language_translate.name }}</span>
-            </div>
-            <span v-if="item.row.type == 1">Review</span>
-            <div>
-              <span v-if="item.row.type == 1 && item.row.language_native">{{ item.row.language_native.name }}</span>
-              <span v-if="item.row.type == 1 && item.row.language_native && item.row.language_translate"> - </span>
-              <span v-if="item.row.type == 1 && item.row.language_translate">{{ item.row.language_translate.name }}</span>
-            </div>
+            <span v-if="item.row.type === 0">Qua đêm</span>
+            <span v-else>Giờ</span>
+
           </template>
         </el-table-column>
-        <el-table-column
-            label="Tên người đặt"
-            min-width="300px">
-          <template slot-scope="item">
-            <div v-if="item.row.user">
-              <span v-if="item.row.user.name && item.row.user.name.length > 0" class="user_name">
-                {{ item.row.user.name }}
-                <span v-if="item.row.user.name !== item.row.user.user_name">
-                  <span v-if="item.row.user.user_name && item.row.user.user_name.length > 0">({{item.row.user.user_name}})</span>
-                </span>
-              </span>
-              <span v-else-if="item.row.user.user_name && item.row.user.user_name.length > 0" class="user_name">
-                {{item.row.user.user_name}}
-              </span>
-              <span v-else>-</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-                label="Trạng thái thanh toán"
-                min-width="200px">
-          <template slot-scope="item">
-            <div>
-              <span v-if="item.row.payment_status === 0" style="color: #909399">
-                <b>Chưa thanh toán</b>
-              </span>
-              <span v-else-if="item.row.payment_status === 1" style="color: #67c23a">
-                <b>Đã thanh toán</b>
-              </span>
-              <span v-else-if="item.row.payment_status === 2" style="color: #e6a23c">
-                <b>Chờ thanh toán</b>
-              </span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-            label="Trạng thái đơn"
-            min-width="150px"
-            prop="status"
-        >
-          <template slot-scope="item">
-            <span v-if="item.row.status === 0">
-              <el-button type="info" size="small">Chưa báo giá</el-button>
-            </span>
-            <span v-else-if="item.row.status === 1">
-              <el-button type="primary" size="small">Đã báo giá</el-button>
-            </span>
-            <span v-else-if="item.row.status === 2">
-              <el-button type="warning" size="small">Đang dịch</el-button>
-            </span>
-            <span v-else-if="item.row.status === 3">
-              <el-button type="success" size="small">Đã dịch xong</el-button>
-            </span>
-            <span v-else-if="item.row.status === 4">
-              <el-button type="warning" size="small">Đang review</el-button>
-            </span>
-            <span v-else-if="item.row.status === 5">
-              <el-button type="success" size="small">Đã review</el-button>
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-            label="Hạn trả"
-            width="150px"
-            sortable>
-          <template slot-scope="item">
-            <span v-if="item.row.deadline">{{ formatDateTime(parseInt(item.row.deadline) * 1000) }}</span>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
+
         <el-table-column
             fixed="right"
             width="100px"
             align="center"
             label="Hành động">
           <template slot-scope="item">
-            <el-tooltip class="item" effect="dark" content="Chỉnh sửa" placement="left"
-                        style="font-size: 16px !important; padding: 8px !important; cursor: pointer !important;">
-              <el-button type="primary" icon="el-icon-edit" circle plain @click="openDialogEdit(item.row)"></el-button>
-            </el-tooltip>
-
-            <el-tooltip class="item" effect="dark" placement="left"
-                        :content="item.row.note !== null && item.row.note.length > 0 ? 'Yêu cầu của khách hàng' : 'Đơn hàng không có yêu cầu'"
-                        style="font-size: 16px !important; padding: 8px !important;">
-              <el-button type="warning" circle plain  v-if="item.row.note !== null && item.row.note.length > 0"
-                         @click="openRequestCustomer(item.row)"  style="cursor: pointer">
-                <i class="fa-solid fa-eye icon-eye"></i>
-              </el-button>
-              <el-button type="warning" circle plain class="not-allowed" v-else style="cursor: not-allowed">
-                <i class="fa-solid fa-eye icon-eye"></i>
-              </el-button>
-            </el-tooltip>
+            <el-popover
+                placement="bottom"
+                trigger="click">
+              <div class="orderControls">
+                <ul>
+                  <li>
+                    <a href="#" @click="confirmOrder(item.row._id)"><i class="el-icon-check"></i>Xác nhận</a>
+                  </li>
+                  <li >
+                    <a href="#" @click="cancelOrder(item.row._id)"><i class="el-icon-delete"></i>Hủy</a>
+                  </li>
+                </ul>
+              </div>
+              <el-button slot="reference" class="actionControl"><i class="el-icon-more"></i></el-button>
+            </el-popover>
 
           </template>
         </el-table-column>
@@ -203,24 +107,20 @@
         </el-col>
       </div>
     </el-card>
-    <el-dialog width="30%" top="5vh"
-               title="Chỉnh sửa đơn hàng"
-               :visible.sync="dialogEdit"
-               class="modalUser"
-               :close-on-click-modal="false"
-               :close-on-press-escape="false"
-               :before-close="closeDialogEdit">
+
+    <el-dialog width="30%" top="5vh" title="Xác nhận yêu cầu đặt phòng"
+               :visible.sync="dialogEdit" class="modalUser">
       <div v-loading="loadingDialog">
         <el-row :gutter="24">
           <el-col :span="24">
             <div class="inputWarp">
-              <label class="form-label">Trạng thái đơn</label>
-              <el-select v-model="status">
+              <label class="form-label">Chọn phòng</label>
+              <el-select v-model="roomId" placeholder="Chọn phòng">
                 <el-option
-                    v-for="item in order_type == '0' ? orderStatus : orderStatusReview"
+                    v-for="item in rooms"
                     :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                    :label="item.name"
+                    :value="item._id">
                 </el-option>
               </el-select>
             </div>
@@ -229,67 +129,33 @@
         <el-row :gutter="24">
           <el-col :span="24">
             <div class="inputWarp">
-              <el-checkbox v-if="payment_status_confirm" disabled v-model="payment_status_confirm">Đã thanh toán</el-checkbox>
-              <el-checkbox v-else-if="!payment_status_confirm" @change="openConfirm" v-model="payment_status">Đã thanh toán</el-checkbox>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row :gutter="24">
-          <el-col :span="24">
-            <div class="inputWarp">
-              <label class="form-label">
-                Số trang
-              </label>
-              <el-input type="number" v-model="total_page"></el-input>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <div class="inputWarp">
-              <label class="form-label">
-                Đơn giá / 1 trang
-              </label>
-              <el-input  @input="formatMoneyinput" v-model="price_per_page"></el-input>
+              <label class="form-label">Ghi chú</label>
+              <el-input type="textarea" :rows="5" v-model="note"> </el-input>
             </div>
           </el-col>
         </el-row>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="handleCloseDialogEdit">Đóng</el-button>
+        <el-button @click="dialogEdit = false">Đóng</el-button>
         <el-button type="primary" @click="handleUpdateOrder">Gửi</el-button>
       </span>
     </el-dialog>
 
-    <el-dialog
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
-      width="30%"
-      top="5vh"
-      v-loading="loadingDialog"
-      title="Xác nhận thanh toán"
-      :visible.sync="dialogConfirm"
-      class="modalUser"
-    >
-      Xác nhân khách hàng đã thanh toán số tiền:
-      <b>{{ formatMoney(this.total_page * this.price_per_page) }}đ</b>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogConfirm = false">Đóng</el-button>
-        <el-button type="primary" @click="confirmPayment">Xác nhận</el-button>
-      </span>
-    </el-dialog>
-
-    <el-dialog width="30%" top="5vh"
-               title="Yêu cầu của khách hàng"
-               :visible.sync="dialogRequest"
-               class="modalUser"
-               :close-on-click-modal="false"
-               :close-on-press-escape="false">
-      <div>
-        {{requestCustomer}}
+    <el-dialog width="30%" top="5vh" title="Hủy yêu cầu đặt phòng"
+               :visible.sync="dialogCancel" class="modalUser">
+      <div v-loading="loadingDialog">
+        <el-row :gutter="24">
+          <el-col :span="24">
+            <div class="inputWarp">
+              <label class="form-label">Ghi chú</label>
+              <el-input type="textarea" :rows="5" v-model="note"> </el-input>
+            </div>
+          </el-col>
+        </el-row>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogRequest = false">Đóng</el-button>
+        <el-button @click="dialogCancel = false">Đóng</el-button>
+        <el-button type="primary" @click="handleCancel">Hủy</el-button>
       </span>
     </el-dialog>
   </div>
@@ -300,7 +166,7 @@ import {mapMutations} from "vuex";
 import api from "@/api";
 import _ from "lodash";
 import moment from "moment";
-import { formatNumber, formatMoney, formatStringtoNumber } from "@/utils/helper";
+import { formatNumber, formatMoney } from "@/utils/helper";
 
 export default {
 name: "RequestOrder",
@@ -309,32 +175,29 @@ name: "RequestOrder",
       'updateTitle'
     ]),
     ...mapMutations('home', [
-      'updateActiveMenu', 'RequestOrder'
+      'updateActiveMenu', 'updateRequestOrder'
     ]),
+    confirmOrder(id) {
+      this.order_id = id
+      this.dialogEdit = true
+    },
+    cancelOrder(id) {
+      this.order_id = id
+      this.dialogCancel = true
+    },
     handleGetOrder(params = {}) {
       this.loading = true
       if (this.search) {
         params.q = this.search
       }
-      if (this.selectedLanguage) {
-        params.native_language_id = this.selectedLanguage;
-      }
-      if (this.selectedLanguageTranslate) {
-        params.translate_language_id = this.selectedLanguageTranslate;
-      }
+
       if (this.type) {
         params.type = this.type;
       }
-      if (this.selectedStatus !== '') {
-        params.status = this.selectedStatus;
-      }
-      if (this.deadlineSort) {
-        params.deadline = this.deadlineSort;
-      }
-      api.getOrderNotQuote(params).then(response => {
+
+      api.getOrderRequest(params).then(response => {
         this.order = _.get(response, "data.data.data", [])
         this.page.currentPage = _.get(response, 'data.data.current_page')
-        this.page.pageSize = _.get(response, 'data.data.per_page')
         this.page.total = _.get(response, 'data.data.total', 0)
         let from = _.get(response, 'data.data.from', 0)
         let to = _.get(response, 'data.data.to', 0)
@@ -360,52 +223,31 @@ name: "RequestOrder",
     formatMoney(price) {
       return formatNumber(price)
     },
-    handleGetAllLanguage() {
-      api.getAllLanguage().then((response) => {
-        this.language = _.get(response, "data.data", []);
-      })
-    },
-    sort(data) {
-      if (data.order) {
-        this.deadlineSort = data.order === "ascending" ? "ASC" : "DESC";
-      } else {
-        this.deadlineSort = "";
-      }
-      this.handleGetOrder();
-    },
-    openDialogEdit(item) {
-      this.order_id = item._id;
-      this.order_type = item.type
-      this.status = parseInt(item.status);
-      this.payment_status_confirm = parseInt(item.payment_status) === 1 ;
-      this.payment_status = parseInt(item.payment_status) === 1 ;
-      this.total_page = item.total_page;
-      this.price_per_page = item.price_per_page
-      this.dialogEdit = true
-    },
-    closeDialogEdit(done) {
-      this.$confirm(' Các sửa đổi sẽ không dược cập nhật nếu có thay đổi. Bạn có chắc chắn muốn đóng?', 'Cảnh báo', {
-        confirmButtonText: 'Đóng',
+
+    handleCancel() {
+      this.$confirm(' Chắc chắn hủy yêu cầu đặt phòng?', 'Cảnh báo', {
+        confirmButtonText: 'Gửi',
         cancelButtonText: 'Hủy',
         type: 'warning'
       }).then(() => {
-        done();
-      }).catch(() => {
-      //
+        this.loadingDialog = true;
+        let data = {
+          note: this.note
+        }
+        api.cancelRequestOrder(data, this.order_id).then(() => {
+          this.$message({
+            type: "success",
+            message: "Hủy yêu cầu thành công!"
+          })
+          if (this.status != 0) {
+            this.updateRequestOrder(this.page.total - 1)
+          }
+          this.loadingDialog = false;
+          this.dialogCancel = false
+          this.handleCurrentChange(this.page.currentPage);
+          this.order_id = ''
+        })
       })
-
-    },
-    handleCloseDialogEdit() {
-      this.$confirm(' Các sửa đổi sẽ không dược cập nhật nếu có thay đổi. Bạn có chắc chắn muốn đóng?', 'Cảnh báo', {
-        confirmButtonText: 'Đóng',
-        cancelButtonText: 'Hủy',
-        type: 'warning'
-      }).then(() => {
-        this.dialogEdit = false
-      }).catch(() => {
-      //
-      })
-
     },
     handleUpdateOrder() {
       this.$confirm(' Bạn có chắc chắn muốn thay đổi thông tin đơn hàng không?', 'Cảnh báo', {
@@ -415,15 +257,12 @@ name: "RequestOrder",
       }).then(() => {
         this.loadingDialog = true;
         let data = {
-          order_id: this.order_id,
-          status: this.status,
-          price_per_page: formatStringtoNumber(this.price_per_page),
-          total_page: this.total_page,
-          payment_status: this.payment_status
+          note: this.note,
+          room_id: this.roomId
         }
-        api.updateOrder(data).then(() => {
+        api.confirmRequestOrder(data, this.order_id).then(() => {
           if (this.status != 0) {
-            this.RequestOrder(this.page.total - 1)
+            this.updateRequestOrder(this.page.total - 1)
           }
           this.loadingDialog = false;
           this.dialogEdit = false
@@ -432,7 +271,7 @@ name: "RequestOrder",
             type: "success",
             message: "Cập nhật thành công"
           })
-          this.confirm = false
+          this.order_id = ''
         }).catch(() => {
           this.loadingDialog = false;
           this.dialogEdit = false
@@ -440,25 +279,10 @@ name: "RequestOrder",
             type: "error",
             message: "Cập nhật thất bại"
           })
-          this.confirm = false
         })
       })
     },
-    exportFile(item) {
-      api.exportFile(item.document._id).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', this.getFileName(item.file_name));
-        document.body.appendChild(link);
-        link.click()
-      }).catch(() => {
-        this.$message.error({
-          type: 'error',
-          message: "Có lỗi! Vui lòng thử lại sau"
-        })
-      })
-    },
+
     confirmPayment() {
       this.dialogConfirm = false;
       this.confirm = true;
@@ -468,23 +292,23 @@ name: "RequestOrder",
         this.dialogConfirm = true
       }
     },
-    getFileName(name) {
-      return name.substr(13)
-    },
+
     getCountOrders() {
       api.getCountOrder().then((res) => {
         if (res) {
-          this.RequestOrder(_.get(res, 'data.data.orderNotQuote'))
+          this.updateRequestOrder(_.get(res, 'data.data.orderRequest'))
         }
       })
     },
     formatMoneyinput() {
       this.price_per_page = formatMoney(this.price_per_page)
     },
-    openRequestCustomer(data) {
-      this.dialogRequest = true
-      this.requestCustomer = data.note
-    }
+
+    getRoomsApi() {
+      api.getAllRooms().then((res) => {
+        this.rooms = _.get(res, 'data.data',[])
+      })
+    },
   },
   watch: {
     dialogConfirm(value) {
@@ -498,11 +322,11 @@ name: "RequestOrder",
     }
   },
   mounted() {
-    this.updateTitle('Đơn hàng chờ báo giá')
+    this.updateTitle('Yêu cầu đặt phòng')
     this.updateActiveMenu('9')
-    this.handleGetOrder();
-    this.handleGetAllLanguage();
-    this.getCountOrders();
+    this.handleGetOrder()
+    this.getCountOrders()
+    this.getRoomsApi()
   },
   data() {
     return {
@@ -511,14 +335,11 @@ name: "RequestOrder",
       loading: false,
       page: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 15,
         total: 0,
         from: 0,
         to: 0
       },
-      language: [],
-      selectedLanguage: "",
-      selectedLanguageTranslate: "",
       selectedStatus: "",
       type: "",
       deadlineSort: "",
@@ -530,50 +351,16 @@ name: "RequestOrder",
       order_id: "",
       order_type: "",
       file: null,
-      uploadText: "Thả tệp vào đây hoặc <em style='color: #409EFF; font-style: normal;'>bấm đê tải tệp lên</em>",
-      errorFile: "",
-      orderStatus: [
-        {
-          label: "Chưa báo giá",
-          value: 0
-        },
-        {
-          label: "Đã báo giá",
-          value: 1
-        },
-        {
-          label: "Đang dịch",
-          value: 2
-        },
-        {
-          label: "Đã dịch xong",
-          value: 3
-        },
-      ],
-      orderStatusReview: [
-        {
-          label: "Chưa báo giá",
-          value: 0
-        },
-        {
-          label: "Đã báo giá",
-          value: 1
-        },
-        {
-          label: "Đang review",
-          value: 4
-        },
-        {
-          label: "Đã review",
-          value: 5
-        },
-      ],
       payment_status: null,
       dialogConfirm: false,
       confirm: false,
       payment_status_confirm: null,
       dialogRequest: false,
-      requestCustomer: ''
+      requestCustomer: '',
+      note: '',
+      dialogCancel: false,
+      rooms: [],
+      roomId: ''
     }
   },
 }
@@ -739,5 +526,39 @@ name: "RequestOrder",
 .el-button--info:focus, .el-button--info:hover {
   background-color: #909399;
   color: #FFFFFF;
+}
+.el-popover {
+  padding: 0 !important;
+
+  .orderControls {
+    ul {
+      margin: 0;
+      padding: 10px;
+      list-style-type: none;
+
+      li {
+
+        a {
+          cursor: pointer;
+          display: block;
+          font-weight: 400;
+          padding: 6px 12px;
+          position: relative;
+          margin: 0 -12px;
+          font-size: 16px;
+          text-decoration: none;
+          color: $colorDefault;
+
+          i {
+            margin-right: 5px;
+          }
+        }
+
+        a:hover {
+          background-color: #f5f6f8;
+        }
+      }
+    }
+  }
 }
 </style>
